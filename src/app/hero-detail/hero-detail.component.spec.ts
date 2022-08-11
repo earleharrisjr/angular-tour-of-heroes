@@ -1,23 +1,44 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 
-import { HeroDetailComponent } from './hero-detail.component';
+import { Hero } from '../hero';
+import { HeroService } from '../hero.service';
 
-describe('HeroDetailComponent', () => {
-  let component: HeroDetailComponent;
-  let fixture: ComponentFixture<HeroDetailComponent>;
+@Component({
+  selector: 'app-hero-detail',
+  templateUrl: './hero-detail.component.html',
+  styleUrls: ['./hero-detail.component.css']
+})
+export class HeroDetailComponent implements OnInit {
+  hero: Hero | undefined;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ HeroDetailComponent ]
-    })
-    .compileComponents();
+  constructor(
+    private route: ActivatedRoute,
+    private heroService: HeroService,
+    private location: Location
+  ) { }
 
-    fixture = TestBed.createComponent(HeroDetailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  ngOnInit(): void {
+    this.getHero();
+  }
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+  getHero(): void {
+    const id = parseInt(this.route.snapshot.paramMap.get('id')!, 10);
+    this.heroService.getHero(id)
+      .subscribe(hero => this.hero = hero);
+  }
+
+  goBack(): void {
+    this.location.back();
+  }
+
+  save(): void {
+    if (this.hero) {
+      this.heroService.updateHero(this.hero)
+        .subscribe(() => this.goBack());
+    }
+  }
+
+  
+}
